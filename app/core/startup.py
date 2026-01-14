@@ -1,0 +1,1 @@
+#startup logic for the AI service

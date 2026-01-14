@@ -1,0 +1,1 @@
+#Defines versioned AI endpoints exposed to the Django backend

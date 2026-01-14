@@ -1,0 +1,1 @@
+#Defines controlled, safe prompts for the LLM

@@ -1,0 +1,1 @@
+#Reads views, interest counts, and trends from DynamoDB

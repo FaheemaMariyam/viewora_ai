@@ -1,0 +1,1 @@
+#Defines request and response schema to validation,clean api contracts
