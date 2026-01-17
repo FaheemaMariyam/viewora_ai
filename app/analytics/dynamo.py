@@ -3,11 +3,12 @@ import os
 import boto3
 from boto3.dynamodb.conditions import Key
 
-def get_property_analytics(property_ids: list) -> str:
+def get_property_analytics(properties: list) -> str:
     """
-    Fetches analytics (views and interests) from DynamoDB for the given property IDs.
+    Fetches analytics (views and interests) from DynamoDB for the given property objects.
+    Ensures context uses human-readable names instead of IDs.
     """
-    if not property_ids:
+    if not properties:
         return "No analytics available for these properties."
 
     try:
@@ -22,8 +23,9 @@ def get_property_analytics(property_ids: list) -> str:
         
         analytics_summary = []
         
-        for pid in property_ids:
-            pid_str = str(pid)
+        for prop in properties:
+            pid_str = str(prop.get("property_id"))
+            locality = prop.get("locality", "Unknown Location")
             
             # 1. Fetch Views
             view_response = view_table.query(
@@ -38,7 +40,7 @@ def get_property_analytics(property_ids: list) -> str:
             total_interests = len(interest_response.get("Items", []))
             
             if total_views > 0 or total_interests > 0:
-                summary = f"Property ID {pid_str}: {total_views} views and {total_interests} interest signals recorded."
+                summary = f"- The {prop.get('type', 'property')} in {locality} ({prop.get('city')}) has {total_views} views and {total_interests} interested buyers."
                 analytics_summary.append(summary)
         
         if not analytics_summary:

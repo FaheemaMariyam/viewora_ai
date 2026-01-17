@@ -27,13 +27,13 @@ def area_insights(request: Request, payload: AreaInsightRequest):
     retriever = get_retriever(vector_store)
     docs = retriever.invoke(payload.question)
 
-    property_ids = [
-        doc.metadata.get("property_id")
+    sources = [
+        doc.metadata
         for doc in docs
         if doc.metadata
     ]
 
-    analytics = get_property_analytics(property_ids)
+    analytics = get_property_analytics(sources)
 
     answer = run_rag_chain(docs, analytics, payload.question)
 

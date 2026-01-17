@@ -18,14 +18,12 @@ app = FastAPI(title="Viewora AI Service")
 # This will hold our vector store
 app.state.vector_store = None
 
-@app.on_event("startup")
-def startup_event():
+def rebuild_index():
     """
-    Final Fix: Connects directly to Postgres. 
-    NO MORE calls to /api/properties/ai-rag/
+    Connects to Postgres, fetches latest published properties,
+    and rebuilds the FAISS vector index.
     """
-    print("🚀 AI SERVICE STARTING: Using DIRECT POSTGRES connection (Fix v3)")
-    
+    print("🔄 REBUILDING AI INDEX: Fetching latest properties from Postgres...")
     try:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME", "viewora_db"),
@@ -61,19 +59,38 @@ def startup_event():
             
         cur.close()
         conn.close()
-        print(f"✅ Success: Found {len(properties)} properties in Database.")
-
+        
         if properties:
-            print("🧠 Building Vector Search Index...")
+            print(f"✅ Success: Found {len(properties)} properties. Re-indexing...")
             docs = [property_to_document(p) for p in properties]
             embeddings = get_embeddings()
             app.state.vector_store = create_vector_store(docs, embeddings)
-            print("🎯 Vector Index is READY.")
+            print("🎯 AI Index is currently SYNCED and READY.")
+            return len(properties)
         else:
-            print("⚠️ No properties found. AI context will be empty.")
+            print("⚠️ No properties found. AI context cleared.")
+            app.state.vector_store = None
+            return 0
 
     except Exception as e:
-        print(f"❌ DATABASE ERROR: Could not connect or fetch properties: {e}")
+        print(f"❌ REBUILD ERROR: {e}")
+        raise e
+
+@app.on_event("startup")
+def startup_event():
+    print("🚀 AI SERVICE STARTING...")
+    try:
+        rebuild_index()
+    except:
+        print("⚠️ Failed to initialize index on startup. Will try again on /sync")
+
+@app.post("/ai/sync")
+def sync_data():
+    """
+    Manual trigger to refresh property data
+    """
+    count = rebuild_index()
+    return {"status": "synced", "count": count}
 
 @app.get("/health")
 def health():
