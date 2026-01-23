@@ -1,5 +1,4 @@
-"# viewora_ai" 
-"# viewora_ai" 
+
 1- Kubernetes (k3s)
  ---------------
 a) What is Kubernetes (K8s)?
