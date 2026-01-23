@@ -57,7 +57,25 @@ We wrote three files in the /k8s folder to tell the Manager what to do:
 -ai-service.yaml: "Give these copies a phone number so they can be reached."
 -ai-hpa.yaml: "If CPU usage > 70%, create more copies (up to 5)."
 
-Phase 5: Deployment & Verification
+ -pahse 5:stress test
+
+ Window 1 - Monitor the pods:
+
+powershell
+kubectl get pods -w
+This command watches the pods in real-time, showing you how the HPA creates new pods as load increases.
+
+This command watches the pods in real-time, showing you how the HPA creates new pods as load increases.
+
+Window 2 - Generate load/stress:
+
+powershell
+while ($true) { Invoke-WebRequest -Uri "http://localhost/ai/chat" -Method POST -Body '{"message":"test"}' -ContentType "application/json" -UseBasicParsing | Out-Null }
+This PowerShell loop continuously sends requests to the AI service to simulate high traffic and trigger the auto-scaling.
+
+The first window let you observe the scaling behavior (pods going from 2 → 3 → 4 → 5 as CPU increased), while the second window generated the load that caused the scaling.
+
+Phase 6: Deployment & Verification
 
 -Deploy: We sent the instructions to the cluster.
 kubectl apply -f k8s/
