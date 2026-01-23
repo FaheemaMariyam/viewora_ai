@@ -23,7 +23,7 @@ def rebuild_index():
     Connects to Postgres, fetches latest published properties,
     and rebuilds the FAISS vector index.
     """
-    print("🔄 REBUILDING AI INDEX: Fetching latest properties from Postgres...")
+    print(" REBUILDING AI INDEX: Fetching latest properties from Postgres...")
     try:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME", "viewora_db"),
@@ -61,28 +61,28 @@ def rebuild_index():
         conn.close()
         
         if properties:
-            print(f"✅ Success: Found {len(properties)} properties. Re-indexing...")
+            print(f" Success: Found {len(properties)} properties. Re-indexing...")
             docs = [property_to_document(p) for p in properties]
             embeddings = get_embeddings()
             app.state.vector_store = create_vector_store(docs, embeddings)
-            print("🎯 AI Index is currently SYNCED and READY.")
+            print(" AI Index is currently SYNCED and READY.")
             return len(properties)
         else:
-            print("⚠️ No properties found. AI context cleared.")
+            print(" No properties found. AI context cleared.")
             app.state.vector_store = None
             return 0
 
     except Exception as e:
-        print(f"❌ REBUILD ERROR: {e}")
+        print(f"REBUILD ERROR: {e}")
         raise e
 
 @app.on_event("startup")
 def startup_event():
-    print("🚀 AI SERVICE STARTING...")
+    print(" AI SERVICE STARTING...")
     try:
         rebuild_index()
     except:
-        print("⚠️ Failed to initialize index on startup. Will try again on /sync")
+        print(" Failed to initialize index on startup. Will try again on /sync")
 
 @app.post("/ai/sync")
 def sync_data():

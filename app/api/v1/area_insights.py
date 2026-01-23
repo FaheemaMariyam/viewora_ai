@@ -15,7 +15,7 @@ class AreaInsightRequest(BaseModel):
 
 @router.post("/area-insights")
 def area_insights(request: Request, payload: AreaInsightRequest):
-    # ✅ READ FROM FASTAPI APP STATE
+    #  READ FROM FASTAPI APP STATE
     vector_store = getattr(request.app.state, "vector_store", None)
 
     if vector_store is None:
